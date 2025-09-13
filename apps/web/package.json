@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev --turbopack --port=3001",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "clean": "git clean -xdf .next .turbo node_modules"
   },
   "dependencies": {
     "radix-ui": "^1.4.2",
