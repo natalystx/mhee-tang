@@ -23,11 +23,12 @@
     "db:stop": "turbo -F server db:stop",
     "db:down": "turbo -F server db:down"
   },
-  "dependencies": {},
   "devDependencies": {
-    "turbo": "^2.5.4",
+    "@t3-oss/env-core": "^0.13.8",
     "husky": "^9.1.7",
-    "lint-staged": "^16.1.2"
+    "lint-staged": "^16.1.2",
+    "turbo": "^2.5.4",
+    "zod": "^4.1.8"
   },
   "lint-staged": {
     "**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,vue,astro,svelte}": ""
