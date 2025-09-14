@@ -1,2 +1,2 @@
 export { createRabbitMQConnection } from "~/client";
-export { contracts } from "~/contracts";
+export * from "~/queues";

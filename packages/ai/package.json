@@ -1,0 +1,37 @@
+{
+  "name": "@mhee-tang/ai",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "nodemon",
+    "clean": "git clean -xdf .turbo dist node_modules",
+    "check-types": "tsc --noEmit"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "zod": "^4.0.2"
+  },
+  "devDependencies": {
+    "@t3-oss/env-core": "^0.13.8",
+    "dotenv": "^17.2.0",
+    "@types/node": "^22.15.3",
+    "nodemon": "^3.1.10",
+    "tsup": "^8.5.0",
+    "tsx": "^4.20.3",
+    "typescript": "5.8.2"
+  }
+}
