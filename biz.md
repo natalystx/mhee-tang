@@ -95,3 +95,135 @@ _(Note: Feature availability is dependent on the user's subscription tier)_
 - **Key Widgets:** Include Current Balances, Spend Summaries, Recent Transactions, Spending by Category charts, and Budget Status.
 - **Trend Comparison Graph:** Visually compare spending from one period to the next.
 - **Secure Data Export (CSV):** Export transaction history via a secure, time-limited download link.
+
+```mermaid
+erDiagram
+    %% Core User and Account Entities
+    User {
+        int user_id PK
+        string email
+        string password_hash
+        string subscription_tier
+        datetime created_at
+    }
+
+    Card {
+        int card_id PK
+        int user_id FK
+        string card_name
+        string bank_name
+        decimal credit_limit "Optional"
+        decimal current_balance
+        int statement_day
+        int due_days_after_statement
+    }
+
+    %% Main Transactional Entities
+    Transaction {
+        int transaction_id PK
+        int user_id FK
+        int card_id FK "Optional, if paid by card"
+        int category_id FK
+        decimal amount
+        string type "expense or income"
+        string merchant_or_source
+        date transaction_date
+        string notes
+    }
+
+    Category {
+        int category_id PK
+        int user_id FK "Null for default categories"
+        string name
+        string icon
+        string type "expense or income"
+    }
+
+    Tag {
+        int tag_id PK
+        int user_id FK
+        string name
+    }
+
+    TransactionTag {
+        int transaction_id FK
+        int tag_id FK
+    }
+
+    RecurringTransaction {
+        int recurring_id PK
+        int user_id FK
+        int category_id FK
+        decimal amount
+        string type "expense or income"
+        string frequency "monthly, weekly"
+        date start_date
+        date end_date "For installments"
+    }
+
+    %% Budgeting and Planning Entities
+    Budget {
+        int budget_id PK
+        int user_id FK
+        int category_id FK
+        string name
+        decimal amount_limit
+        string period "monthly, weekly, custom"
+        int reset_day "For monthly budgets"
+    }
+
+    Goal {
+        int goal_id PK
+        int user_id FK
+        string name
+        string icon
+        decimal target_amount
+        decimal current_amount
+        date target_date "Optional"
+    }
+
+    Scenario {
+        int scenario_id PK
+        int user_id FK
+        string name
+        datetime created_at
+    }
+
+    ScenarioEvent {
+        int event_id PK
+        int scenario_id FK
+        string event_type "income_change, etc."
+        json details
+    }
+
+    %% AI and System Entities
+    AI_Insight {
+        int insight_id PK
+        int user_id FK
+        string title
+        string body_text
+        bool is_read
+        datetime created_at
+    }
+
+    %% Defining Relationships
+    User ||--o{ Card : "manages"
+    User ||--o{ Transaction : "performs"
+    User ||--o{ Category : "creates"
+    User ||--o{ Tag : "creates"
+    User ||--o{ Budget : "sets"
+    User ||--o{ Goal : "sets"
+    User ||--o{ Scenario : "creates"
+    User ||--o{ AI_Insight : "receives"
+    User ||--o{ RecurringTransaction : "schedules"
+
+    Card ||--o{ Transaction : "used for"
+    Category ||--o{ Transaction : "classifies"
+    Category ||--o{ Budget : "is for"
+
+    Transaction }|--|{ Tag : "has"
+    Transaction ||--o{ TransactionTag : "linked via"
+    Tag ||--o{ TransactionTag : "linked via"
+
+    Scenario ||--o{ ScenarioEvent : "contains"
+```

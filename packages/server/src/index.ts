@@ -1,11 +1,11 @@
 import { node } from "@elysiajs/node";
 import { Elysia } from "elysia";
 import { cors } from "@elysiajs/cors";
-import { auth } from "./lib/auth";
 import { env } from "./env";
 import openapi from "@elysiajs/openapi";
+import { transactionRouter } from "./domains/transaction/transaction.router";
 
-const app = new Elysia({ adapter: node() })
+const app = new Elysia({ adapter: node(), prefix: "/v1/api" })
   .use(
     openapi({
       path: "/docs",
@@ -19,8 +19,8 @@ const app = new Elysia({ adapter: node() })
       credentials: true,
     })
   )
-  .mount("/auth", auth.handler)
-  .get("/", () => "OK")
-  .listen(env.PORT, () => {
-    console.log("Server is running on http://localhost:" + env.PORT);
-  });
+  .get("/healthz", () => "OK")
+  .use(transactionRouter)
+  .listen(env.PORT);
+
+console.log(`🚀 Server ready at: http://localhost:${env.PORT}`);
