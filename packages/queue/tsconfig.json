@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "declarationMap": true,
+    "incremental": false,
+    "isolatedModules": true,
+    "lib": ["es2022", "DOM", "DOM.Iterable"],
+    "moduleDetection": "force",
+    "noUncheckedIndexedAccess": true,
+    "baseUrl": ".",
+    "target": "esnext",
+    "module": "esnext",
+    "outDir": "./dist",
+    "rootDir": ".",
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "declaration": true,
+    "paths": { "~/*": ["src/*"] },
+    "types": ["node"]
+  },
+
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

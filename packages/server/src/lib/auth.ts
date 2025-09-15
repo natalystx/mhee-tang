@@ -6,8 +6,12 @@ import * as schema from "../db/schema/auth";
 import { env } from "@/env";
 import { emailOTP } from "better-auth/plugins";
 import { sendEmail } from "./email";
+import { openAPI } from "better-auth/plugins";
+import { UID_PREFIX } from "@/constants/uid-prefix";
+import { uid } from "@/utils/uid";
 
 export const auth = betterAuth({
+  basePath: "/auth",
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: schema,
@@ -20,7 +24,27 @@ export const auth = betterAuth({
       httpOnly: true,
     },
   },
+  databaseHooks: {
+    user: {
+      create: {
+        before: async (user) => {
+          const userUID = uid(UID_PREFIX.USER);
+          return { data: { ...user, uid: userUID } };
+        },
+      },
+    },
+    session: {
+      create: {
+        before: async (session) => {
+          const sessionUID = uid(UID_PREFIX.SESSION);
+          return { data: { ...session, uid: sessionUID } };
+        },
+      },
+    },
+  },
+
   plugins: [
+    openAPI(),
     expo(),
     emailOTP({
       async sendVerificationOTP({ email, otp, type }) {
