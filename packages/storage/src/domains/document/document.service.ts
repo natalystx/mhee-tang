@@ -1,4 +1,4 @@
-import { documentBiz } from "./document.biz"
+import { documentBiz } from "./document.biz";
 
 export const documentService = {
   uploadDocument: documentBiz.uploadDocument,
@@ -6,4 +6,5 @@ export const documentService = {
   listDocuments: documentBiz.listDocuments,
   listDocumentsWithPrefix: documentBiz.listDocumentsWithPrefix,
   deleteDocument: documentBiz.deleteDocument,
-}
+  listDocumentsWithPrefixAsBuffer: documentBiz.listDocumentsWithPrefixAsBuffer,
+};

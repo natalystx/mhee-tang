@@ -6,6 +6,18 @@ export type TransactionInput = Omit<
   "id" | "createdAt" | "updatedAt" | "uid"
 >;
 
+export const PaginationSchema = z.object({
+  page: z.number().min(1).default(1).describe("Page number for pagination"),
+  pageSize: z
+    .number()
+    .min(1)
+    .max(100)
+    .default(20)
+    .describe("Number of items per page for pagination"),
+});
+
+export type PaginationInput = z.infer<typeof PaginationSchema>;
+
 export const TransactionSchema = z.object({
   uid: z.string().describe("Unique identifier for the transaction"),
   name: z.string().describe("Name or title of the transaction"),
@@ -55,3 +67,15 @@ export const toTransactionArray = (
 ) => {
   return data.map(toTransaction);
 };
+
+const uploadTransaction = z.object({
+  image: z.instanceof(File).describe("Image file to be uploaded"),
+});
+
+export const UploadTransactionSchema = z
+  .object({
+    images: z.array(uploadTransaction),
+  })
+  .describe("Array of image files to be uploaded");
+
+export type UploadTransactionInput = z.infer<typeof UploadTransactionSchema>;

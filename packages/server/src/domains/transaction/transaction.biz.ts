@@ -1,12 +1,19 @@
+import { db } from "@/db";
 import { transactionRepo } from "./transaction.repo";
-import type { TransactionInput } from "./transaction.type";
+import type { PaginationInput, TransactionInput } from "./transaction.type";
 
 const create = (data: TransactionInput) => {
-  return transactionRepo.create(data);
+  return db.transaction(async () => {
+    return await transactionRepo.create(data);
+  });
 };
 
-const findManyByUserId = (userId: string, descending = true) => {
-  return transactionRepo.findManyByUserId(userId, descending);
+const findManyByUserId = (
+  userId: string,
+  pagination: PaginationInput,
+  descending = true
+) => {
+  return transactionRepo.findManyByUserId(userId, pagination, descending);
 };
 
 const findByUid = (uid: string) => {

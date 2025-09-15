@@ -39,7 +39,7 @@ const consumer = async (
           channel.ack(msg);
         } catch (error) {
           console.error("Error processing message:", error);
-          channel.nack(msg, false, false); // Discard the message
+          channel.nack(msg, false, false);
         }
       }
     },

@@ -4,6 +4,7 @@ const imageSchema = z.object({
   name: z.string(),
   content: z.base64(),
   mimeType: z.string(),
+  ext: z.string(),
 });
 
 export const transactionExtractorPayloadSchema = z.object({
@@ -16,16 +17,22 @@ export type TransactionExtractorPayload = z.infer<
 >;
 
 const transactionSchema = z.object({
-  date: z.string().min(1),
-  amount: z.number(),
-  description: z.string().min(1),
+  currency: z.string().min(1),
+  name: z.string().min(1),
+  source: z.string().min(1).nullable(),
+  bankName: z.string().min(1).nullable(),
+  receiver: z.string().min(1).nullable(),
   type: z.enum(["expense", "income", "transfer"]),
-  category: z.string().min(1).optional(),
+  notes: z.string().nullable(),
+  transactionDate: z.string().min(1),
+  amount: z.number(),
+  category: z.string().min(1).nullable(),
 });
 
 const transactionExtractorResultSchema = z.object({
   transactions: z.array(transactionSchema).min(1),
   userId: z.string().min(1),
+  batchId: z.string().min(1),
 });
 
 export type TransactionExtractorResult = z.infer<

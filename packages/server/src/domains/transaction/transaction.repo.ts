@@ -1,6 +1,6 @@
 import { transaction } from "@/db/schema/transaction";
 import { db } from "@/db";
-import type { TransactionInput } from "./transaction.type";
+import type { PaginationInput, TransactionInput } from "./transaction.type";
 import { eq } from "drizzle-orm";
 import {} from "date-fns";
 import { startOfMonth, endOfMonth, parseISO } from "date-fns";
@@ -19,10 +19,18 @@ const findByUid = (uid: string) => {
   });
 };
 
-const findManyByUserId = (userId: string, descending: boolean) => {
+const findManyByUserId = (
+  userId: string,
+  pagination: PaginationInput,
+  descending: boolean
+) => {
+  const { page, pageSize } = pagination;
+  const offset = (page - 1) * pageSize;
   return db.query.transaction.findMany({
     where: (transaction, { eq, and }) =>
       and(eq(transaction.userId, userId), eq(transaction.isDeleted, false)),
+    limit: pageSize,
+    offset: offset,
     orderBy: (transaction, { desc, asc }) => [
       descending
         ? desc(transaction.transactionDate)

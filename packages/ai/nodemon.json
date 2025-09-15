@@ -1,8 +1,0 @@
-{
-  "watch": ["src"],
-  "ext": "ts,json",
-  "exec": "tsup --silent && tsx watch ./src/index.ts",
-  "env": {
-    "NODE_ENV": "development"
-  }
-}
