@@ -69,6 +69,10 @@ export default function RootLayout() {
               name="(onboarding)/basic-info"
               options={{ headerShown: false }}
             />
+            <Stack.Screen
+              name="(dashboard)/index"
+              options={{ headerShown: false }}
+            />
           </Stack>
         </GestureHandlerRootView>
       </KeyboardProvider>

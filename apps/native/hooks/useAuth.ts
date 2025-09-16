@@ -2,7 +2,7 @@ import { authClient } from "@/lib/auth";
 import { useEffect, useState } from "react";
 
 export const useAuth = () => {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const getSession = async () => {
