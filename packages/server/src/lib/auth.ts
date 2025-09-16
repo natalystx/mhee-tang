@@ -35,6 +35,16 @@ export const auth = betterAuth({
     },
   },
 
+  user: {
+    additionalFields: {
+      englishName: {
+        type: "string",
+        required: false,
+        input: true,
+        defaultValue: () => null,
+      }
+    },
+  },
   plugins: [
     openAPI(),
     expo(),

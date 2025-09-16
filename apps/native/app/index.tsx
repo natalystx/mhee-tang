@@ -14,11 +14,11 @@ const IndexScreen = () => {
     return <Redirect href="/(onboarding)" />;
   }
 
-  if (!user?.name) {
+  if (!user) {
     return <Redirect href="/(onboarding)/basic-info" />;
   }
 
-  return <Redirect href="/(onboarding)" />;
+  return <Redirect href="/(dashboard)" />;
 };
 
 export default IndexScreen;
