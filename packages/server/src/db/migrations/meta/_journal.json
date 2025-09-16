@@ -15,6 +15,34 @@
       "when": 1757837086182,
       "tag": "0001_nosy_sally_floyd",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1757983885647,
+      "tag": "0002_peaceful_abomination",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1757984116811,
+      "tag": "0003_magical_kabuki",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1757984270842,
+      "tag": "0004_classy_speedball",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1757984508894,
+      "tag": "0005_serious_silverclaw",
+      "breakpoints": true
     }
   ]
 }

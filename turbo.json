@@ -18,8 +18,8 @@
       "persistent": false
     },
     "dev": {
-      "cache": false,
-      "persistent": true
+      "dependsOn": ["^build"],      
+      "cache": false      
     },
     "db:push": {
       "cache": false,

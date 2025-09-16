@@ -11,17 +11,17 @@ import { UID_PREFIX } from "@/constants/uid-prefix";
 import { uid } from "@/utils/uid";
 
 export const auth = betterAuth({
-  basePath: "/auth",
+  basePath: "/auth",  
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: schema,
   }),
-  trustedOrigins: [env.CORS_ORIGIN || "", "my-better-t-app://"],
+  trustedOrigins: [env.CORS_ORIGIN, "mhee-tang://", "http://localhost:8081", "http://localhost:19006", "http://127.0.0.1:8081"],
   advanced: {
-    defaultCookieAttributes: {
+    defaultCookieAttributes: {          
+      httpOnly: true,
       sameSite: "none",
       secure: true,
-      httpOnly: true,
     },
   },
   databaseHooks: {
@@ -30,14 +30,6 @@ export const auth = betterAuth({
         before: async (user) => {
           const userUID = uid(UID_PREFIX.USER);
           return { data: { ...user, uid: userUID } };
-        },
-      },
-    },
-    session: {
-      create: {
-        before: async (session) => {
-          const sessionUID = uid(UID_PREFIX.SESSION);
-          return { data: { ...session, uid: sessionUID } };
         },
       },
     },
@@ -50,6 +42,7 @@ export const auth = betterAuth({
       async sendVerificationOTP({ email, otp, type }) {
         switch (type) {
           case "sign-in":
+            console.log("Sending sign-in OTP to:", email, "OTP:", otp);
             await sendEmail(
               email,
               "Your sign-in code",

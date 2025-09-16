@@ -1,8 +1,10 @@
+import { UID_PREFIX } from "@/constants/uid-prefix";
+import { uid } from "@/utils/uid";
 import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
-  uid: text("uid").notNull().unique(),
+  uid: text("uid").unique().default(uid(UID_PREFIX.USER)),
   name: text("name"),
   englishName: text("english_name"),
   email: text("email").notNull().unique(),
@@ -15,7 +17,7 @@ export const user = pgTable("user", {
 export const session = pgTable("session", {
   id: text("id").primaryKey(),
   expiresAt: timestamp("expires_at").notNull(),
-  uid: text("uid").notNull().unique(),
+  uid: text("uid").notNull().unique().default(uid(UID_PREFIX.SESSION)),
   token: text("token").notNull().unique(),
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
