@@ -20,7 +20,7 @@ export const transactionTypeEnum = pgEnum("transaction_type", [
 ]);
 
 export const tag = pgTable("tag", {
-  uid: text("uid").notNull().unique().default(uid(UID_PREFIX.TAG)),
+  uid: text("uid").unique().default(uid(UID_PREFIX.TAG)),
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   userId: text("user_id")
@@ -29,7 +29,7 @@ export const tag = pgTable("tag", {
 });
 
 export const category = pgTable("category", {
-  uid: text("uid").notNull().unique().default(uid(UID_PREFIX.CATEGORY)),
+  uid: text("uid").unique().default(uid(UID_PREFIX.CATEGORY)),
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   type: transactionTypeEnum("type").notNull(),
@@ -40,7 +40,7 @@ export const category = pgTable("category", {
 
 export const transaction = pgTable("transaction", {
   id: serial("id").primaryKey(),
-  uid: text("uid").notNull().unique().default(uid(UID_PREFIX.TRANSACTION)),
+  uid: text("uid").unique().default(uid(UID_PREFIX.TRANSACTION)),
   amount: decimal("amount", { precision: 19, scale: 4 }).notNull(),
   name: text("name").notNull(),
   currency: text("currency").notNull().default("THB"),
@@ -50,9 +50,9 @@ export const transaction = pgTable("transaction", {
   bankName: text("bank_name"),
   receiver: text("receiver"),
   transactionDate: timestamp("transaction_date").notNull(),
-  isDeleted: boolean("is_deleted").notNull().default(false),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  isDeleted: boolean("is_deleted").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
   onDeviceImageURI: text("on_device_image_uri"),
   userId: text("user_id")
     .notNull()
@@ -87,8 +87,7 @@ export const recurringTypeEnum = pgEnum("recurring_type", [
 
 export const recurringTransaction = pgTable("recurring_transaction", {
   id: serial("id").primaryKey(),
-  uid: text("uid")
-    .notNull()
+  uid: text("uid")    
     .unique()
     .default(uid(UID_PREFIX.RECURRING_TRANSACTION)),
   userId: text("user_id")
