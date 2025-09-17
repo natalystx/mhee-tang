@@ -7,7 +7,6 @@
   ],
   "scripts": {
     "prepare": "husky",
-    "predev": "pnpm i",
     "dev": "turbo dev",
     "build": "turbo build",
     "clean:workspaces": "turbo run clean",

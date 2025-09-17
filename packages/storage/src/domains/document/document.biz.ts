@@ -84,6 +84,15 @@ const listDocumentsWithPrefixAsBuffer = async (prefix: string) => {
   }
 };
 
+const deleteDirectory = async (prefix: string): Promise<boolean> => {
+  try {
+    await documentRepo.deleteDirectory(prefix);
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
+
 export const documentBiz = {
   uploadDocument,
   downloadDocument,
@@ -91,4 +100,5 @@ export const documentBiz = {
   listDocuments,
   listDocumentsWithPrefix,
   listDocumentsWithPrefixAsBuffer,
+  deleteDirectory,
 };

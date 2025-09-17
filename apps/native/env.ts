@@ -6,6 +6,7 @@ export const env = createEnv({
 
   client: {
     EXPO_PUBLIC_API_ENDPOINT: z.string().min(1),
+    EXPO_PUBLIC_BASE_API_ENDPOINT: z.string().min(1),
   },
 
   runtimeEnv: process.env,

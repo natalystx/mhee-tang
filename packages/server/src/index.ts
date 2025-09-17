@@ -5,6 +5,7 @@ import { env } from "./env";
 import openapi from "@elysiajs/openapi";
 import { transactionRouter } from "./domains/transaction/transaction.router";
 import { queueConsumeService } from "./domains/queue-consume/queue-consume.service";
+import { documentService } from "@mhee-tang/storage";
 
 export const app = new Elysia({ adapter: node(), prefix: "/v1/api" })
   .use(
@@ -21,6 +22,10 @@ export const app = new Elysia({ adapter: node(), prefix: "/v1/api" })
     })
   )
   .get("/healthz", () => "OK")
+  .post("/clear-store", async () => {
+    await documentService.deleteDirectory("transactions");
+    return { message: "Store cleared" };
+  })
   .use(transactionRouter)
   .listen(env.PORT, () => {
     queueConsumeService.init();

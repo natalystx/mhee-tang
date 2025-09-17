@@ -44,9 +44,8 @@ const queueTransactionExtract = async (
 const onTransactionExtractCompleted = async () => {
   return await transactionResultQueue.consumer(async (data) => {
     const userId = data.userId;
-    await documentService.deleteDocument(
-      `transactions/${userId}`,
-      data.batchId
+    await documentService.deleteDirectory(
+      `transactions/${userId}/${data.batchId}`
     );
     for (const item of data.transactions) {
       await transactionBiz.create({
