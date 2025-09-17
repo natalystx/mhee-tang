@@ -6,26 +6,39 @@ import {
   transactionExtractQueue,
 } from "@mhee-tang/queue";
 import { documentService } from "@mhee-tang/storage";
+import { v7 as uuid } from "uuid";
 
 const queueTransactionExtract = async (
   data: UploadTransactionInput,
   userId: string
 ) => {
-  const payload = data.images.map(async (item) => {
-    const fileBuffer = await item.image.arrayBuffer();
-    const fileType = await fileTypeFromBuffer(Buffer.from(fileBuffer));
-    return {
-      content: Buffer.from(fileBuffer).toString("base64"),
-      mimeType: fileType?.mime || "application/octet-stream",
-      name: item.image.name,
-      ext: fileType?.ext || "bin",
-    };
-  });
-  const awaitedPayload = await Promise.all(payload);
-  return await transactionExtractQueue.producer({
-    images: awaitedPayload,
-    userId: userId,
-  });
+  try {
+    console.log(
+      "queueTransactionExtract called with data:",
+      JSON.stringify(data, null, 2),
+      userId
+    );
+
+    const payload = data.images.map(async ({ image }) => {
+      const fileBuffer = Buffer.from(image, "base64");
+      const fileType = await fileTypeFromBuffer(fileBuffer);
+
+      return {
+        content: Buffer.from(fileBuffer).toString("base64"),
+        mimeType: fileType?.mime || "application/octet-stream",
+        name: uuid(),
+        ext: fileType?.ext || "bin",
+      };
+    });
+    const awaitedPayload = await Promise.all(payload);
+    console.log("Payload prepared for queue:", awaitedPayload);
+    return await transactionExtractQueue.producer({
+      images: awaitedPayload,
+      userId: userId,
+    });
+  } catch (error) {
+    console.error("Error in queueTransactionExtract:", error);
+  }
 };
 
 const onTransactionExtractCompleted = async () => {
@@ -47,7 +60,7 @@ const onTransactionExtractCompleted = async () => {
         receiver: item.receiver || null,
         notes: item.notes || null,
         userId: userId,
-        categoryId: item.category || null,
+        // categoryId: item.category || null,
       });
     }
   });

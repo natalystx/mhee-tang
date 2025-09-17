@@ -38,6 +38,7 @@ export const transactionRouter = new Elysia({ name: "transaction-router" })
     "/transactions",
     async ({ user, body }) => {
       try {
+        console.log("Transaction creation queued", body, user.id);
         await transactionService.queueTransactionExtract(body, user.id);
         return { message: "Transaction creation in progress" };
       } catch (error) {
@@ -47,6 +48,7 @@ export const transactionRouter = new Elysia({ name: "transaction-router" })
     {
       auth: true,
       body: UploadTransactionSchema,
+      contentType: "multipart/form-data",
       response: {
         200: z.object({ message: z.string() }),
         500: z.object({ message: z.string() }),

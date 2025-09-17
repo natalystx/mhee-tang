@@ -12,7 +12,9 @@
     },
     "outDir": "./dist",
     "types": [
-        "node"
+        "node",
+        "@types/bun",
+        "@types/node"
 
     ],
     "composite": true,

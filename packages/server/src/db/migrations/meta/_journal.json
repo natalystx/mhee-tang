@@ -43,6 +43,13 @@
       "when": 1757984508894,
       "tag": "0005_serious_silverclaw",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1758075862586,
+      "tag": "0006_ancient_nitro",
+      "breakpoints": true
     }
   ]
 }

@@ -4,11 +4,13 @@ import type { PaginationInput, TransactionInput } from "./transaction.type";
 import { eq } from "drizzle-orm";
 import {} from "date-fns";
 import { startOfMonth, endOfMonth, parseISO } from "date-fns";
+import { uid } from "@/utils/uid";
+import { UID_PREFIX } from "@/constants/uid-prefix";
 
 const create = (data: TransactionInput) => {
   return db
     .insert(transaction)
-    .values({ ...data })
+    .values({ ...data, uid: uid(UID_PREFIX.TRANSACTION) })
     .returning();
 };
 

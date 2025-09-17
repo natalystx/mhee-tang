@@ -13,6 +13,7 @@ const storeTransactions = async (
   payload: TransactionInput
 ): Promise<ParseQueuePayload> => {
   const batchId = uuid();
+  console.log("Storing transactions for batch:", batchId);
   const folderName = `transactions/${payload.userId}/${batchId}`;
 
   for (const image of payload.images) {
@@ -32,6 +33,7 @@ const storeTransactions = async (
 
 const parseTransactions = async (userId: string, batchId: string) => {
   try {
+    console.log("Parsing transactions for batch:", batchId);
     const files = await documentService.listDocumentsWithPrefixAsBuffer(
       `transactions/${userId}/${batchId}`
     );
@@ -51,10 +53,14 @@ const parseTransactions = async (userId: string, batchId: string) => {
       ],
       schema: TransactionPromptOutputSchema,
     });
-
+    console.log(
+      "AI response received for batch:",
+      batchId,
+      JSON.stringify(response.usage, null, 2)
+    );
     await transactionResultQueue.producer({
       userId,
-      transactions: TransactionPromptOutputSchema.parse(response.response.body),
+      transactions: TransactionPromptOutputSchema.parse(response.object),
       batchId,
     });
   } catch (error) {

@@ -6,7 +6,7 @@ import openapi from "@elysiajs/openapi";
 import { transactionRouter } from "./domains/transaction/transaction.router";
 import { queueConsumeService } from "./domains/queue-consume/queue-consume.service";
 
-new Elysia({ adapter: node(), prefix: "/v1/api" })
+export const app = new Elysia({ adapter: node(), prefix: "/v1/api" })
   .use(
     openapi({
       path: "/docs",
@@ -14,7 +14,7 @@ new Elysia({ adapter: node(), prefix: "/v1/api" })
   )
   .use(
     cors({
-      origin: [ env.CORS_ORIGIN, "mhee-tang://", "http://localhost:8081", "http://localhost:19006", "http://127.0.0.1:8081"],
+      origin: ["*"],
       methods: ["GET", "POST", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],
       credentials: true,
@@ -22,8 +22,8 @@ new Elysia({ adapter: node(), prefix: "/v1/api" })
   )
   .get("/healthz", () => "OK")
   .use(transactionRouter)
-  .listen(env.PORT);
-
-queueConsumeService.init();
-
-console.log(`🚀 Server ready at: http://localhost:${env.PORT}`);
+  .listen(env.PORT, () => {
+    queueConsumeService.init();
+    console.log("Queue consumer service initialized");
+    console.log(`🚀 Server ready at: http://localhost:${env.PORT}`);
+  });

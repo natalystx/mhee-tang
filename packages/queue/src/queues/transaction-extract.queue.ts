@@ -14,8 +14,6 @@ const producer = async (payload: TransactionExtractorPayload) => {
     Buffer.from(JSON.stringify(parsedPayload)),
     { persistent: true }
   );
-
-  return channel.close();
 };
 
 const consumer = async (

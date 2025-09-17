@@ -69,7 +69,7 @@ export const toTransactionArray = (
 };
 
 const uploadTransaction = z.object({
-  image: z.instanceof(File).describe("Image file to be uploaded"),
+  image: z.base64().describe("Base64 encoded image file"),
 });
 
 export const UploadTransactionSchema = z

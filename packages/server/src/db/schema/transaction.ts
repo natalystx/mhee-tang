@@ -25,7 +25,7 @@ export const tag = pgTable("tag", {
   name: text("name").notNull(),
   userId: text("user_id")
     .notNull()
-    .references(() => user.uid),
+    .references(() => user.id),
 });
 
 export const category = pgTable("category", {
@@ -35,7 +35,7 @@ export const category = pgTable("category", {
   type: transactionTypeEnum("type").notNull(),
   userId: text("user_id")
     .notNull()
-    .references(() => user.uid),
+    .references(() => user.id),
 });
 
 export const transaction = pgTable("transaction", {
@@ -56,7 +56,7 @@ export const transaction = pgTable("transaction", {
   onDeviceImageURI: text("on_device_image_uri"),
   userId: text("user_id")
     .notNull()
-    .references(() => user.uid),
+    .references(() => user.id),
   categoryId: text("category_id").references(() => category.uid),
 });
 
@@ -87,12 +87,10 @@ export const recurringTypeEnum = pgEnum("recurring_type", [
 
 export const recurringTransaction = pgTable("recurring_transaction", {
   id: serial("id").primaryKey(),
-  uid: text("uid")    
-    .unique()
-    .default(uid(UID_PREFIX.RECURRING_TRANSACTION)),
+  uid: text("uid").unique().default(uid(UID_PREFIX.RECURRING_TRANSACTION)),
   userId: text("user_id")
     .notNull()
-    .references(() => user.uid),
+    .references(() => user.id),
   amount: decimal("amount", { precision: 19, scale: 4 }).notNull(),
   name: text("name").notNull(),
   type: transactionTypeEnum("type").notNull(),

@@ -34,8 +34,8 @@ new Elysia({ adapter: node(), prefix: "/v1/api" })
 
     return { text };
   })
-  .listen(env.PORT);
+  .listen(env.PORT, () => {
+    transactionConsumer.consume();
 
-transactionConsumer.consume();
-
-console.log(`🚀 AI ready at: http://localhost:${env.PORT}`);
+    console.log(`🚀 AI ready at: http://localhost:${env.PORT}`);
+  });
