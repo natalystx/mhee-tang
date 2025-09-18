@@ -1,6 +1,11 @@
 import { db } from "@/db";
 import { transactionRepo } from "./transaction.repo";
-import type { PaginationInput, TransactionInput } from "./transaction.type";
+import type {
+  FindByCategoryIdsParams,
+  FindByTagIdsParams,
+  PaginationInput,
+  TransactionInput,
+} from "./transaction.type";
 
 const create = (data: TransactionInput) => {
   return db.transaction(async () => {
@@ -32,16 +37,20 @@ const hardRemoveByUid = (uid: string) => {
   return transactionRepo.hardRemoveByUid(uid);
 };
 
-const getByCategoryId = (
-  categoryId: string,
-  userId: string,
-  descending = true
-) => {
-  return transactionRepo.getByCategoryId(categoryId, userId, descending);
+const getByCategoryId = (params: FindByCategoryIdsParams) => {
+  return transactionRepo.findByCategoryIds(params);
 };
 
-const getByTagIds = (tagsId: string[], userId: string, descending: boolean) => {
-  return transactionRepo.getByTagIds(tagsId, userId, descending);
+const getByTagIds = (params: FindByTagIdsParams) => {
+  return transactionRepo.findByTagIds(params);
+};
+
+const findAllByDateRange = (
+  userId: string,
+  startDate: string,
+  endDate: string
+) => {
+  return transactionRepo.findAllByDateRange(userId, startDate, endDate);
 };
 
 export const transactionBiz = {
@@ -53,4 +62,5 @@ export const transactionBiz = {
   hardRemoveByUid,
   getByCategoryId,
   getByTagIds,
+  findAllByDateRange,
 };

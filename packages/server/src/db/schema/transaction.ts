@@ -9,6 +9,7 @@ import {
   integer,
   serial,
 } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 import { user } from "./auth";
 import { uid } from "@/utils/uid";
 import { UID_PREFIX } from "@/constants/uid-prefix";
@@ -33,9 +34,8 @@ export const category = pgTable("category", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   type: transactionTypeEnum("type").notNull(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => user.id),
+  slug: text("slug").notNull(),
+  userId: text("user_id").references(() => user.id),
 });
 
 export const transaction = pgTable("transaction", {
@@ -110,3 +110,34 @@ export const recurringTransaction = pgTable("recurring_transaction", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
   endDate: timestamp("end_date"),
 });
+
+// Define relations between tables
+export const categoryRelations = relations(category, ({ many }) => ({
+  transactions: many(transaction),
+}));
+
+export const transactionRelations = relations(transaction, ({ one }) => ({
+  category: one(category, {
+    fields: [transaction.categoryId],
+    references: [category.uid],
+  }),
+  user: one(user, {
+    fields: [transaction.userId],
+    references: [user.id],
+  }),
+}));
+
+export const tagRelations = relations(tag, ({ many }) => ({
+  transactionTags: many(transactionTag),
+}));
+
+export const transactionTagRelations = relations(transactionTag, ({ one }) => ({
+  transaction: one(transaction, {
+    fields: [transactionTag.transactionId],
+    references: [transaction.uid],
+  }),
+  tag: one(tag, {
+    fields: [transactionTag.tagId],
+    references: [tag.uid],
+  }),
+}));

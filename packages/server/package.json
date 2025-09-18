@@ -39,10 +39,12 @@
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.1",
     "drizzle-orm": "^0.44.2",
+    "drizzle-seed": "^0.3.1",
     "elysia": "1.4.0",
     "file-type": "^21.0.0",
     "pg": "^8.14.1",
     "resend": "^6.0.3",
+    "slugify": "^1.6.6",
     "uuid": "^13.0.0",
     "zod": "^4.0.2"
   },

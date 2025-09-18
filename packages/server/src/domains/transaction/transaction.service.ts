@@ -7,18 +7,13 @@ import {
 } from "@mhee-tang/queue";
 import { documentService } from "@mhee-tang/storage";
 import { v7 as uuid } from "uuid";
+import { db } from "@/db";
 
 const queueTransactionExtract = async (
   data: UploadTransactionInput,
   userId: string
 ) => {
   try {
-    console.log(
-      "queueTransactionExtract called with data:",
-      JSON.stringify(data, null, 2),
-      userId
-    );
-
     const payload = data.images.map(async ({ image }) => {
       const fileBuffer = Buffer.from(image, "base64");
       const fileType = await fileTypeFromBuffer(fileBuffer);
@@ -31,13 +26,13 @@ const queueTransactionExtract = async (
       };
     });
     const awaitedPayload = await Promise.all(payload);
-    console.log("Payload prepared for queue:", awaitedPayload);
+
     return await transactionExtractQueue.producer({
       images: awaitedPayload,
       userId: userId,
     });
   } catch (error) {
-    console.error("Error in queueTransactionExtract:", error);
+    throw error;
   }
 };
 
@@ -48,6 +43,17 @@ const onTransactionExtractCompleted = async () => {
       `transactions/${userId}/${data.batchId}`
     );
     for (const item of data.transactions) {
+      let categoryId: string | null = null;
+
+      if (!!item.category) {
+        const category = await db.query.category.findFirst({
+          where: (cat, { eq, or, isNull }) =>
+            eq(cat.slug, item.category!) &&
+            or(eq(cat.userId, userId), isNull(cat.userId)),
+        });
+        categoryId = category?.uid || null;
+      }
+
       await transactionBiz.create({
         name: item.name,
         amount: String(item.amount),
@@ -59,7 +65,7 @@ const onTransactionExtractCompleted = async () => {
         receiver: item.receiver || null,
         notes: item.notes || null,
         userId: userId,
-        // categoryId: item.category || null,
+        categoryId: categoryId || undefined,
       });
     }
   });

@@ -6,6 +6,7 @@ import openapi from "@elysiajs/openapi";
 import { transactionRouter } from "./domains/transaction/transaction.router";
 import { queueConsumeService } from "./domains/queue-consume/queue-consume.service";
 import { documentService } from "@mhee-tang/storage";
+import { initializeCategories } from "./db/seed";
 
 export const app = new Elysia({ adapter: node(), prefix: "/v1/api" })
   .use(
@@ -29,6 +30,7 @@ export const app = new Elysia({ adapter: node(), prefix: "/v1/api" })
   .use(transactionRouter)
   .listen(env.PORT, () => {
     queueConsumeService.init();
+    initializeCategories();
     console.log("Queue consumer service initialized");
     console.log(`🚀 Server ready at: http://localhost:${env.PORT}`);
   });
