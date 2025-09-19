@@ -1,12 +1,14 @@
-import { category, transaction } from "@/db/schema/transaction";
+import { category, transaction, transactionTag } from "@/db/schema/transaction";
 import { db } from "@/db";
 import type {
+  AggregateByMonthParams,
   FindByCategoryIdsParams,
+  FindByDateRangeParams,
   FindByTagIdsParams,
-  PaginationInput,
+  FindByUserIdParams,
   TransactionInput,
 } from "./transaction.type";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { startOfMonth, endOfMonth, parseISO } from "date-fns";
 import { uid } from "@/utils/uid";
 import { UID_PREFIX } from "@/constants/uid-prefix";
@@ -24,16 +26,21 @@ const findByUid = (uid: string) => {
       and(eq(transaction.uid, uid), eq(transaction.isDeleted, false)),
     with: {
       category: true,
+      transactionTags: {
+        with: {
+          tag: true,
+        },
+      },
     },
   });
 };
 
-const findManyByUserId = (
-  userId: string,
-  pagination: PaginationInput,
-  descending: boolean
-) => {
-  const { page, pageSize } = pagination;
+const findManyByUserId = ({
+  userId,
+  descending,
+  page = 1,
+  pageSize = 20,
+}: FindByUserIdParams) => {
   const offset = (page - 1) * pageSize;
   return db.query.transaction.findMany({
     where: (transaction, { eq, and }) =>
@@ -42,6 +49,11 @@ const findManyByUserId = (
     offset: offset,
     with: {
       category: true,
+      transactionTags: {
+        with: {
+          tag: true,
+        },
+      },
     },
     orderBy: (transaction, { desc, asc }) => [
       descending
@@ -72,21 +84,28 @@ const hardRemoveByUid = (uid: string) => {
 };
 
 const findByCategoryIds = ({
-  categoryId,
+  categoryIds,
   userId,
   descending,
   startDate,
   endDate,
+  page = 1,
+  pageSize = 20,
 }: FindByCategoryIdsParams) => {
   const startDateParsed = startDate ? parseISO(startDate) : undefined;
   const endDateParsed = endDate ? parseISO(endDate) : undefined;
   return db.query.transaction.findMany({
     with: {
       category: true,
+      transactionTags: {
+        with: {
+          tag: true,
+        },
+      },
     },
     where: (transaction, { eq, and, inArray, lte, gte }) => {
       const conditions = [
-        inArray(transaction.categoryId, categoryId),
+        inArray(transaction.categoryId, categoryIds),
         eq(transaction.isDeleted, false),
         eq(transaction.userId, userId),
       ];
@@ -98,6 +117,8 @@ const findByCategoryIds = ({
       }
       return and(...conditions);
     },
+    limit: pageSize,
+    offset: (page - 1) * pageSize,
     orderBy: (transaction, { desc, asc }) => [
       descending
         ? desc(transaction.transactionDate)
@@ -112,6 +133,8 @@ const findByTagIds = ({
   descending,
   startDate: startDateISO,
   endDate: endDateISO,
+  page = 1,
+  pageSize = 20,
 }: FindByTagIdsParams) => {
   const startDate = startDateISO ? parseISO(startDateISO) : undefined;
   const endDate = endDateISO ? parseISO(endDateISO) : undefined;
@@ -119,7 +142,14 @@ const findByTagIds = ({
   return db.query.transaction.findMany({
     with: {
       category: true,
+      transactionTags: {
+        with: {
+          tag: true,
+        },
+      },
     },
+    limit: pageSize,
+    offset: (page - 1) * pageSize,
     where: (transaction, { eq, and, inArray, gte, lte }) => {
       const dateConditions = [];
       if (startDate) {
@@ -143,7 +173,11 @@ const findByTagIds = ({
   });
 };
 
-const aggregateByMonth = async (userId: string, dateISO: string) => {
+const aggregateByMonth = async ({
+  userId,
+  dateISO,
+  type,
+}: AggregateByMonthParams) => {
   const baseDate = parseISO(dateISO);
   const startDate = startOfMonth(baseDate);
   const endDate = endOfMonth(baseDate);
@@ -158,30 +192,54 @@ const aggregateByMonth = async (userId: string, dateISO: string) => {
       ),
   });
 
-  return rows.reduce(
+  const aggregatedValues = rows.reduce(
     (acc, curr) => {
       if (curr.type === "income") {
         acc.totalIncome += Number(curr.amount);
       } else if (curr.type === "expense") {
         acc.totalExpense += Number(curr.amount);
+      } else if (curr.type === "transfer") {
+        acc.totalTransfer += Number(curr.amount);
       }
       return acc;
     },
-    { totalIncome: 0, totalExpense: 0 }
+    { totalIncome: 0, totalExpense: 0, totalTransfer: 0 }
   );
+
+  switch (type) {
+    case "income":
+      return aggregatedValues.totalIncome;
+    case "expense":
+      return aggregatedValues.totalExpense;
+    case "transfer":
+      return aggregatedValues.totalTransfer;
+    default:
+      // this is for "balance" type
+      return aggregatedValues.totalIncome - aggregatedValues.totalExpense;
+  }
 };
 
-const findAllByDateRange = (
-  userId: string,
-  startDateISO: string,
-  endDateISO: string
-) => {
+const findAllByDateRange = ({
+  userId,
+  startDateISO,
+  endDateISO,
+  descending,
+  page = 1,
+  pageSize = 20,
+}: FindByDateRangeParams) => {
   const startDate = parseISO(startDateISO);
   const endDate = parseISO(endDateISO);
   return db.query.transaction.findMany({
     with: {
       category: true,
+      transactionTags: {
+        with: {
+          tag: true,
+        },
+      },
     },
+    limit: pageSize,
+    offset: (page - 1) * pageSize,
     where: (transaction, { eq, and, gte, lte }) =>
       and(
         eq(transaction.userId, userId),
@@ -189,8 +247,49 @@ const findAllByDateRange = (
         gte(transaction.transactionDate, startDate),
         lte(transaction.transactionDate, endDate)
       ),
-    orderBy: (transaction, { desc }) => [desc(transaction.transactionDate)],
+    orderBy: (transaction, { desc, asc }) => [
+      descending
+        ? desc(transaction.transactionDate)
+        : asc(transaction.transactionDate),
+    ],
   });
+};
+
+const linkCategoryToTransactions = async (
+  categoryId: string,
+  transactionId: string
+) => {
+  return db
+    .update(transaction)
+    .set({ categoryId: categoryId, updatedAt: new Date() })
+    .where(eq(transaction.uid, transactionId))
+    .returning();
+};
+
+const linkTagToTransactions = async (tagId: string, transactionId: string) => {
+  return db
+    .insert(transactionTag)
+    .values({
+      tagId,
+      transactionId,
+    })
+    .onConflictDoNothing() // Prevents duplicate entries if the relationship already exists
+    .returning();
+};
+
+const unlinkTagFromTransaction = async (
+  tagId: string,
+  transactionId: string
+) => {
+  return db
+    .delete(transactionTag)
+    .where(
+      and(
+        eq(transactionTag.tagId, tagId),
+        eq(transactionTag.transactionId, transactionId)
+      )
+    )
+    .returning();
 };
 
 export const transactionRepo = {
@@ -204,4 +303,7 @@ export const transactionRepo = {
   findByTagIds,
   aggregateByMonth,
   findAllByDateRange,
+  linkCategoryToTransactions,
+  linkTagToTransactions,
+  unlinkTagFromTransaction,
 };

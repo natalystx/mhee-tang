@@ -88,6 +88,18 @@ export const UploadTransactionSchema = z
   })
   .describe("Array of image files to be uploaded");
 
+export const AggregateByMonthSchema = z.object({
+  dateISO: z
+    .string()
+    .describe("ISO 8601 formatted date to specify the month and year"),
+  type: z
+    .enum(["income", "expense", "transfer", "balance"])
+    .describe(
+      "Type of transactions to aggregate (income, expense, transfer, balance)"
+    ),
+  userId: z.string().describe("Identifier of the user"),
+});
+
 export type UploadTransactionInput = z.infer<typeof UploadTransactionSchema>;
 
 export type FindByTagIdsParams = {
@@ -96,12 +108,26 @@ export type FindByTagIdsParams = {
   descending: boolean;
   startDate?: string;
   endDate?: string;
-};
+} & PaginationInput;
 
 export type FindByCategoryIdsParams = {
-  categoryId: string[];
+  categoryIds: string[];
   userId: string;
   descending: boolean;
   startDate?: string;
   endDate?: string;
-};
+} & PaginationInput;
+
+export type FindByDateRangeParams = {
+  userId: string;
+  startDateISO: string;
+  endDateISO: string;
+  descending?: boolean;
+} & PaginationInput;
+
+export type FindByUserIdParams = {
+  userId: string;
+  descending?: boolean;
+} & PaginationInput;
+
+export type AggregateByMonthParams = z.infer<typeof AggregateByMonthSchema>;

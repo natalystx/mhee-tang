@@ -1,8 +1,11 @@
 import { db } from "@/db";
 import { transactionRepo } from "./transaction.repo";
 import type {
+  AggregateByMonthParams,
   FindByCategoryIdsParams,
+  FindByDateRangeParams,
   FindByTagIdsParams,
+  FindByUserIdParams,
   PaginationInput,
   TransactionInput,
 } from "./transaction.type";
@@ -13,12 +16,8 @@ const create = (data: TransactionInput) => {
   });
 };
 
-const findManyByUserId = (
-  userId: string,
-  pagination: PaginationInput,
-  descending = true
-) => {
-  return transactionRepo.findManyByUserId(userId, pagination, descending);
+const findManyByUserId = (params: FindByUserIdParams) => {
+  return transactionRepo.findManyByUserId(params);
 };
 
 const findByUid = (uid: string) => {
@@ -37,7 +36,7 @@ const hardRemoveByUid = (uid: string) => {
   return transactionRepo.hardRemoveByUid(uid);
 };
 
-const getByCategoryId = (params: FindByCategoryIdsParams) => {
+const getByCategoryIds = (params: FindByCategoryIdsParams) => {
   return transactionRepo.findByCategoryIds(params);
 };
 
@@ -45,12 +44,12 @@ const getByTagIds = (params: FindByTagIdsParams) => {
   return transactionRepo.findByTagIds(params);
 };
 
-const findAllByDateRange = (
-  userId: string,
-  startDate: string,
-  endDate: string
-) => {
-  return transactionRepo.findAllByDateRange(userId, startDate, endDate);
+const findAllByDateRange = (params: FindByDateRangeParams) => {
+  return transactionRepo.findAllByDateRange(params);
+};
+
+const getAggregateByMonth = async (params: AggregateByMonthParams) => {
+  return transactionRepo.aggregateByMonth(params);
 };
 
 export const transactionBiz = {
@@ -60,7 +59,8 @@ export const transactionBiz = {
   updateByUid,
   removeByUid,
   hardRemoveByUid,
-  getByCategoryId,
+  getByCategoryIds,
   getByTagIds,
   findAllByDateRange,
+  getAggregateByMonth,
 };
