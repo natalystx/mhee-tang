@@ -1,6 +1,6 @@
 {
-  "id": "a615907f-1063-4dbf-8e74-a5b531ac313f",
-  "prevId": "2eb2f00d-0743-4350-9764-103b0f25b68b",
+  "id": "e762a6c6-4769-4efd-b8c8-e335c3e0bbe0",
+  "prevId": "483f00f5-4f2c-42a9-b526-05d378a4433b",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -129,7 +129,8 @@
           "name": "uid",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "'ses_01996463-242e-734b-b64e-2a81325cb538'"
         },
         "token": {
           "name": "token",
@@ -219,7 +220,8 @@
           "name": "uid",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false,
+          "default": "'usr_01996463-242d-7339-817f-4dfbf7c6e04e'"
         },
         "name": {
           "name": "name",
@@ -336,6 +338,145 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.budget": {
+      "name": "budget",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "uid": {
+          "name": "uid",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'bdg_01996463-2435-7121-8800-89c7f5e8249d'"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "current_amount": {
+          "name": "current_amount",
+          "type": "numeric(19, 4)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "target": {
+          "name": "target",
+          "type": "numeric(19, 4)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cycle": {
+          "name": "cycle",
+          "type": "budget_cycle",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "start_date": {
+          "name": "start_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "end_date": {
+          "name": "end_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reset_on_last_business_day": {
+          "name": "reset_on_last_business_day",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "is_deleted": {
+          "name": "is_deleted",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "category_id": {
+          "name": "category_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "budget_user_id_user_id_fk": {
+          "name": "budget_user_id_user_id_fk",
+          "tableFrom": "budget",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "budget_category_id_category_uid_fk": {
+          "name": "budget_category_id_category_uid_fk",
+          "tableFrom": "budget",
+          "tableTo": "category",
+          "columnsFrom": [
+            "category_id"
+          ],
+          "columnsTo": [
+            "uid"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "budget_uid_unique": {
+          "name": "budget_uid_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "uid"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.category": {
       "name": "category",
       "schema": "",
@@ -344,8 +485,8 @@
           "name": "uid",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "default": "'cat_01994741-4ddc-751d-8652-0d10e7c71afd'"
+          "notNull": false,
+          "default": "'cat_01996463-2434-775e-b2bc-fc7cdf529076'"
         },
         "id": {
           "name": "id",
@@ -366,24 +507,30 @@
           "primaryKey": false,
           "notNull": true
         },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
         "user_id": {
           "name": "user_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         }
       },
       "indexes": {},
       "foreignKeys": {
-        "category_user_id_user_uid_fk": {
-          "name": "category_user_id_user_uid_fk",
+        "category_user_id_user_id_fk": {
+          "name": "category_user_id_user_id_fk",
           "tableFrom": "category",
           "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
           "columnsTo": [
-            "uid"
+            "id"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -417,8 +564,8 @@
           "name": "uid",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "default": "'rtn_01994741-4ddc-751d-8652-1636b440d468'"
+          "notNull": false,
+          "default": "'rtn_01996463-2435-7121-8800-87424dcc7123'"
         },
         "user_id": {
           "name": "user_id",
@@ -525,15 +672,15 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "recurring_transaction_user_id_user_uid_fk": {
-          "name": "recurring_transaction_user_id_user_uid_fk",
+        "recurring_transaction_user_id_user_id_fk": {
+          "name": "recurring_transaction_user_id_user_id_fk",
           "tableFrom": "recurring_transaction",
           "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
           "columnsTo": [
-            "uid"
+            "id"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -574,8 +721,8 @@
           "name": "uid",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "default": "'tag_01994741-4ddc-751d-8652-0a4b13b16d9f'"
+          "notNull": false,
+          "default": "'tag_01996463-2434-775e-b2bc-f98940b1aaec'"
         },
         "id": {
           "name": "id",
@@ -598,15 +745,15 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "tag_user_id_user_uid_fk": {
-          "name": "tag_user_id_user_uid_fk",
+        "tag_user_id_user_id_fk": {
+          "name": "tag_user_id_user_id_fk",
           "tableFrom": "tag",
           "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
           "columnsTo": [
-            "uid"
+            "id"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -640,8 +787,8 @@
           "name": "uid",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "default": "'txn_01994741-4ddc-751d-8652-12962dc5f5a6'"
+          "notNull": false,
+          "default": "'txn_01996463-2434-775e-b2bd-038cdf1efea7'"
         },
         "amount": {
           "name": "amount",
@@ -675,6 +822,24 @@
           "primaryKey": false,
           "notNull": false
         },
+        "source": {
+          "name": "source",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bank_name": {
+          "name": "bank_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "receiver": {
+          "name": "receiver",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "transaction_date": {
           "name": "transaction_date",
           "type": "timestamp",
@@ -685,21 +850,21 @@
           "name": "is_deleted",
           "type": "boolean",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "default": false
         },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "default": "now()"
         },
         "on_device_image_uri": {
@@ -723,15 +888,15 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "transaction_user_id_user_uid_fk": {
-          "name": "transaction_user_id_user_uid_fk",
+        "transaction_user_id_user_id_fk": {
+          "name": "transaction_user_id_user_id_fk",
           "tableFrom": "transaction",
           "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
           "columnsTo": [
-            "uid"
+            "id"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -826,6 +991,17 @@
     }
   },
   "enums": {
+    "public.budget_cycle": {
+      "name": "budget_cycle",
+      "schema": "public",
+      "values": [
+        "daily",
+        "weekly",
+        "monthly",
+        "yearly",
+        "custom"
+      ]
+    },
     "public.recurring_type": {
       "name": "recurring_type",
       "schema": "public",

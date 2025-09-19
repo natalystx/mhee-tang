@@ -62,4 +62,16 @@ Expense Categories: ${EXPENSE_CATEGORIES.map((category) => slugify(category)).jo
 Income Categories: ${INCOME_CATEGORIES.map((category) => slugify(category)).join(", ")}.
 If the transaction type is "transfer", set the category to null.
 If you cannot determine the category, set it to "Others".
+If the image is not a financial document or if you cannot extract any meaningful transaction data, return the data 
+{"amount": 0, 
+"name": "Invalid transaction", 
+"source": "Invalid transaction", 
+"bankName": "Invalid transaction", 
+"receiver": "Invalid transaction", 
+"currency": "THB", 
+"type": "expense", 
+// start UNIX epoch time with ISO 8601 format
+"transactionDate": "1970-01-01T00:00:00.000Z", 
+"category": null, 
+"notes": null}
 `;

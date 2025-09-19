@@ -5,78 +5,15 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1757832064524,
-      "tag": "0000_thick_black_tom",
+      "when": 1758325804642,
+      "tag": "0000_greedy_valeria_richards",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1757837086182,
-      "tag": "0001_nosy_sally_floyd",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1757983885647,
-      "tag": "0002_peaceful_abomination",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1757984116811,
-      "tag": "0003_magical_kabuki",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1757984270842,
-      "tag": "0004_classy_speedball",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1757984508894,
-      "tag": "0005_serious_silverclaw",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1758075862586,
-      "tag": "0006_ancient_nitro",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1758159097598,
-      "tag": "0007_nappy_colonel_america",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "7",
-      "when": 1758161344993,
-      "tag": "0008_harsh_natasha_romanoff",
-      "breakpoints": true
-    },
-    {
-      "idx": 9,
-      "version": "7",
-      "when": 1758232553022,
-      "tag": "0009_ambitious_starhawk",
-      "breakpoints": true
-    },
-    {
-      "idx": 10,
-      "version": "7",
-      "when": 1758232765016,
-      "tag": "0010_thick_kulan_gath",
+      "when": 1758325843012,
+      "tag": "0001_milky_maddog",
       "breakpoints": true
     }
   ]

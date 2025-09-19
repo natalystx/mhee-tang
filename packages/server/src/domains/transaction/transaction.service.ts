@@ -9,6 +9,8 @@ import { documentService } from "@mhee-tang/storage";
 import { v7 as uuid } from "uuid";
 import { db } from "@/db";
 
+const INVALID_TRANSACTION_NAME = "Invalid transaction";
+
 const queueTransactionExtract = async (
   data: UploadTransactionInput,
   userId: string
@@ -42,7 +44,9 @@ const onTransactionExtractCompleted = async () => {
     await documentService.deleteDirectory(
       `transactions/${userId}/${data.batchId}`
     );
-    for (const item of data.transactions) {
+    for (const item of data.transactions.filter(
+      (i) => i.name !== INVALID_TRANSACTION_NAME
+    )) {
       let categoryId: string | null = null;
 
       if (!!item.category) {

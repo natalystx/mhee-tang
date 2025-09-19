@@ -5,6 +5,7 @@ import { env } from "./env";
 import { transactionRouter } from "./domains/transaction/transaction.router";
 import { tagRouter } from "./domains/tag/tag.router";
 import { categoryRouter } from "./domains/category/category.router";
+import { budgetRouter } from "./domains/budget/budget.router";
 import { queueConsumeService } from "./domains/queue-consume/queue-consume.service";
 import { documentService } from "@mhee-tang/storage";
 import { initializeCategories } from "./db/seed";
@@ -26,6 +27,7 @@ export const app = new Elysia({ adapter: node(), prefix: "/v1/api" })
   .use(transactionRouter)
   .use(tagRouter)
   .use(categoryRouter)
+  .use(budgetRouter)
   .listen(env.PORT, () => {
     queueConsumeService.init();
     initializeCategories();
