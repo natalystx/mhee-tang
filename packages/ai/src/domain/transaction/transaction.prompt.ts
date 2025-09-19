@@ -1,5 +1,21 @@
 import { z } from "zod";
-import {} from "ai";
+import slugify from "slugify";
+
+const EXPENSE_CATEGORIES = [
+  "Food & Drink",
+  "Transportation",
+  "Shopping",
+  "Health",
+  "Entertainment",
+  "Bills & Utilities",
+  "Education",
+  "Personal Care",
+  "Travel",
+  "Gifts & Donations",
+  "Others",
+];
+
+const INCOME_CATEGORIES = ["Salary", "Business/Freelance", "Other Income"];
 
 export const TransactionPromptOutputSchema = z.array(
   z.object({
@@ -41,4 +57,9 @@ export const systemPrompt = `You are an AI assistant that helps users to extract
 data from their receipts, invoices, bills, slips and other financial document images. 
 You will be provided with text extracted from these images using OCR (Optical Character Recognition) technology.
 Your task is to analyze the provided text and extract relevant information to create a structured transaction object.
+Here are available categories for expense and income transactions:
+Expense Categories: ${EXPENSE_CATEGORIES.map((category) => slugify(category)).join(", ")}.
+Income Categories: ${INCOME_CATEGORIES.map((category) => slugify(category)).join(", ")}.
+If the transaction type is "transfer", set the category to null.
+If you cannot determine the category, set it to "Others".
 `;

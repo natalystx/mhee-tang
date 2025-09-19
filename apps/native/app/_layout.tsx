@@ -47,8 +47,8 @@ export default function RootLayout() {
     return null;
   }
   return (
-    <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-      <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
+    <ThemeProvider value={LIGHT_THEME}>
+      <StatusBar style={"light"} />
       <KeyboardProvider statusBarTranslucent navigationBarTranslucent>
         <GestureHandlerRootView style={{ flex: 1, width: "100%" }}>
           <Stack>

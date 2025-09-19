@@ -8,7 +8,6 @@ type BASE_CONFIG_TYPE = {
     google: {
       thinkingConfig: {
         thinkingBudget: number;
-        includeThoughts: boolean;
       };
     };
   };
@@ -21,7 +20,6 @@ export const AI_CONFIG: BASE_CONFIG_TYPE = {
     google: {
       thinkingConfig: {
         thinkingBudget: 512,
-        includeThoughts: true,
       },
     },
   },

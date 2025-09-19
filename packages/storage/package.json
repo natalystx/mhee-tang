@@ -14,7 +14,6 @@
   },
   "scripts": {
     "build": "tsup",
-    "dev": "nodemon",
     "clean": "git clean -xdf .turbo dist node_modules",
     "check-types": "tsc --noEmit"
   },

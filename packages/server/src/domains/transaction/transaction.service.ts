@@ -6,36 +6,54 @@ import {
   transactionExtractQueue,
 } from "@mhee-tang/queue";
 import { documentService } from "@mhee-tang/storage";
+import { v7 as uuid } from "uuid";
+import { db } from "@/db";
 
 const queueTransactionExtract = async (
   data: UploadTransactionInput,
   userId: string
 ) => {
-  const payload = data.images.map(async (item) => {
-    const fileBuffer = await item.image.arrayBuffer();
-    const fileType = await fileTypeFromBuffer(Buffer.from(fileBuffer));
-    return {
-      content: Buffer.from(fileBuffer).toString("base64"),
-      mimeType: fileType?.mime || "application/octet-stream",
-      name: item.image.name,
-      ext: fileType?.ext || "bin",
-    };
-  });
-  const awaitedPayload = await Promise.all(payload);
-  return await transactionExtractQueue.producer({
-    images: awaitedPayload,
-    userId: userId,
-  });
+  try {
+    const payload = data.images.map(async ({ image }) => {
+      const fileBuffer = Buffer.from(image, "base64");
+      const fileType = await fileTypeFromBuffer(fileBuffer);
+
+      return {
+        content: Buffer.from(fileBuffer).toString("base64"),
+        mimeType: fileType?.mime || "application/octet-stream",
+        name: uuid(),
+        ext: fileType?.ext || "bin",
+      };
+    });
+    const awaitedPayload = await Promise.all(payload);
+
+    return await transactionExtractQueue.producer({
+      images: awaitedPayload,
+      userId: userId,
+    });
+  } catch (error) {
+    throw error;
+  }
 };
 
 const onTransactionExtractCompleted = async () => {
   return await transactionResultQueue.consumer(async (data) => {
     const userId = data.userId;
-    await documentService.deleteDocument(
-      `transactions/${userId}`,
-      data.batchId
+    await documentService.deleteDirectory(
+      `transactions/${userId}/${data.batchId}`
     );
     for (const item of data.transactions) {
+      let categoryId: string | null = null;
+
+      if (!!item.category) {
+        const category = await db.query.category.findFirst({
+          where: (cat, { eq, or, isNull }) =>
+            eq(cat.slug, item.category!) &&
+            or(eq(cat.userId, userId), isNull(cat.userId)),
+        });
+        categoryId = category?.uid || null;
+      }
+
       await transactionBiz.create({
         name: item.name,
         amount: String(item.amount),
@@ -47,7 +65,7 @@ const onTransactionExtractCompleted = async () => {
         receiver: item.receiver || null,
         notes: item.notes || null,
         userId: userId,
-        categoryId: item.category || null,
+        categoryId: categoryId || undefined,
       });
     }
   });

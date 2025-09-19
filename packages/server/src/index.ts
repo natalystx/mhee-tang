@@ -2,28 +2,33 @@ import { node } from "@elysiajs/node";
 import { Elysia } from "elysia";
 import { cors } from "@elysiajs/cors";
 import { env } from "./env";
-import openapi from "@elysiajs/openapi";
 import { transactionRouter } from "./domains/transaction/transaction.router";
+import { tagRouter } from "./domains/tag/tag.router";
+import { categoryRouter } from "./domains/category/category.router";
 import { queueConsumeService } from "./domains/queue-consume/queue-consume.service";
+import { documentService } from "@mhee-tang/storage";
+import { initializeCategories } from "./db/seed";
 
-new Elysia({ adapter: node(), prefix: "/v1/api" })
-  .use(
-    openapi({
-      path: "/docs",
-    })
-  )
+export const app = new Elysia({ adapter: node(), prefix: "/v1/api" })
   .use(
     cors({
-      origin: [ env.CORS_ORIGIN, "mhee-tang://", "http://localhost:8081", "http://localhost:19006", "http://127.0.0.1:8081"],
+      origin: ["*"],
       methods: ["GET", "POST", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],
       credentials: true,
     })
   )
   .get("/healthz", () => "OK")
+  .post("/clear-store", async () => {
+    await documentService.deleteDirectory("transactions");
+    return { message: "Store cleared" };
+  })
   .use(transactionRouter)
-  .listen(env.PORT);
-
-queueConsumeService.init();
-
-console.log(`🚀 Server ready at: http://localhost:${env.PORT}`);
+  .use(tagRouter)
+  .use(categoryRouter)
+  .listen(env.PORT, () => {
+    queueConsumeService.init();
+    initializeCategories();
+    console.log("Queue consumer service initialized");
+    console.log(`🚀 Server ready at: http://localhost:${env.PORT}`);
+  });

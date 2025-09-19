@@ -7,4 +7,5 @@ export const documentService = {
   listDocumentsWithPrefix: documentBiz.listDocumentsWithPrefix,
   deleteDocument: documentBiz.deleteDocument,
   listDocumentsWithPrefixAsBuffer: documentBiz.listDocumentsWithPrefixAsBuffer,
+  deleteDirectory: documentBiz.deleteDirectory,
 };

@@ -1,4 +1,4 @@
-import type { transaction } from "@/db/schema/transaction";
+import { category, type transaction } from "@/db/schema/transaction";
 import { z } from "zod";
 
 export type TransactionInput = Omit<
@@ -14,6 +14,18 @@ export const PaginationSchema = z.object({
     .max(100)
     .default(20)
     .describe("Number of items per page for pagination"),
+});
+
+const CategorySchema = z.object({
+  uid: z.string().describe("Unique identifier for the category"),
+  name: z.string().describe("Name of the category"),
+  slug: z.string().describe("Slug for the category"),
+  userId: z
+    .string()
+    .nullable()
+    .describe(
+      "Identifier of the user who owns the category if null it's a default category"
+    ),
 });
 
 export type PaginationInput = z.infer<typeof PaginationSchema>;
@@ -38,8 +50,9 @@ export const TransactionSchema = z.object({
     .string()
     .nullable()
     .describe("Additional notes or description for the transaction"),
-  transactionDate: z
-    .string()
+  transactionDate: z.coerce
+    .date()
+    .transform((date) => date.toISOString())
     .describe(
       "Date and time when the transaction occurred the ISO 8601 format"
     ),
@@ -50,10 +63,7 @@ export const TransactionSchema = z.object({
   userId: z
     .string()
     .describe("Identifier of the user who owns the transaction"),
-  categoryId: z
-    .string()
-    .nullable()
-    .describe("Identifier of the category associated with the transaction"),
+  category: CategorySchema.nullable().describe("Category of the transaction"),
 });
 
 export const TransactionArraySchema = z.array(TransactionSchema);
@@ -69,7 +79,7 @@ export const toTransactionArray = (
 };
 
 const uploadTransaction = z.object({
-  image: z.instanceof(File).describe("Image file to be uploaded"),
+  image: z.base64().describe("Base64 encoded image file"),
 });
 
 export const UploadTransactionSchema = z
@@ -78,4 +88,46 @@ export const UploadTransactionSchema = z
   })
   .describe("Array of image files to be uploaded");
 
+export const AggregateByMonthSchema = z.object({
+  dateISO: z
+    .string()
+    .describe("ISO 8601 formatted date to specify the month and year"),
+  type: z
+    .enum(["income", "expense", "transfer", "balance"])
+    .describe(
+      "Type of transactions to aggregate (income, expense, transfer, balance)"
+    ),
+  userId: z.string().describe("Identifier of the user"),
+});
+
 export type UploadTransactionInput = z.infer<typeof UploadTransactionSchema>;
+
+export type FindByTagIdsParams = {
+  tagsId: string[];
+  userId: string;
+  descending: boolean;
+  startDate?: string;
+  endDate?: string;
+} & PaginationInput;
+
+export type FindByCategoryIdsParams = {
+  categoryIds: string[];
+  userId: string;
+  descending: boolean;
+  startDate?: string;
+  endDate?: string;
+} & PaginationInput;
+
+export type FindByDateRangeParams = {
+  userId: string;
+  startDateISO: string;
+  endDateISO: string;
+  descending?: boolean;
+} & PaginationInput;
+
+export type FindByUserIdParams = {
+  userId: string;
+  descending?: boolean;
+} & PaginationInput;
+
+export type AggregateByMonthParams = z.infer<typeof AggregateByMonthSchema>;

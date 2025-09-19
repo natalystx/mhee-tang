@@ -53,6 +53,10 @@ const listFilesWithPrefixAsBuffer = async (prefix: string) => {
   return files;
 };
 
+const deleteDirectory = async (prefix: string) => {
+  return await r2.deleteDirectory(prefix);
+};
+
 export const documentRepo = {
   uploadFile,
   downloadFile,
@@ -60,4 +64,5 @@ export const documentRepo = {
   listFiles,
   listFilesWithPrefix,
   listFilesWithPrefixAsBuffer,
+  deleteDirectory,
 };

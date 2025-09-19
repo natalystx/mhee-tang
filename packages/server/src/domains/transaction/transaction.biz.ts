@@ -1,6 +1,14 @@
 import { db } from "@/db";
 import { transactionRepo } from "./transaction.repo";
-import type { PaginationInput, TransactionInput } from "./transaction.type";
+import type {
+  AggregateByMonthParams,
+  FindByCategoryIdsParams,
+  FindByDateRangeParams,
+  FindByTagIdsParams,
+  FindByUserIdParams,
+  PaginationInput,
+  TransactionInput,
+} from "./transaction.type";
 
 const create = (data: TransactionInput) => {
   return db.transaction(async () => {
@@ -8,12 +16,8 @@ const create = (data: TransactionInput) => {
   });
 };
 
-const findManyByUserId = (
-  userId: string,
-  pagination: PaginationInput,
-  descending = true
-) => {
-  return transactionRepo.findManyByUserId(userId, pagination, descending);
+const findManyByUserId = (params: FindByUserIdParams) => {
+  return transactionRepo.findManyByUserId(params);
 };
 
 const findByUid = (uid: string) => {
@@ -32,16 +36,20 @@ const hardRemoveByUid = (uid: string) => {
   return transactionRepo.hardRemoveByUid(uid);
 };
 
-const getByCategoryId = (
-  categoryId: string,
-  userId: string,
-  descending = true
-) => {
-  return transactionRepo.getByCategoryId(categoryId, userId, descending);
+const getByCategoryIds = (params: FindByCategoryIdsParams) => {
+  return transactionRepo.findByCategoryIds(params);
 };
 
-const getByTagIds = (tagsId: string[], userId: string, descending: boolean) => {
-  return transactionRepo.getByTagIds(tagsId, userId, descending);
+const getByTagIds = (params: FindByTagIdsParams) => {
+  return transactionRepo.findByTagIds(params);
+};
+
+const findAllByDateRange = (params: FindByDateRangeParams) => {
+  return transactionRepo.findAllByDateRange(params);
+};
+
+const getAggregateByMonth = async (params: AggregateByMonthParams) => {
+  return transactionRepo.aggregateByMonth(params);
 };
 
 export const transactionBiz = {
@@ -51,6 +59,8 @@ export const transactionBiz = {
   updateByUid,
   removeByUid,
   hardRemoveByUid,
-  getByCategoryId,
+  getByCategoryIds,
   getByTagIds,
+  findAllByDateRange,
+  getAggregateByMonth,
 };

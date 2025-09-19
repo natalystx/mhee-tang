@@ -9,6 +9,7 @@ import {
   integer,
   serial,
 } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 import { user } from "./auth";
 import { uid } from "@/utils/uid";
 import { UID_PREFIX } from "@/constants/uid-prefix";
@@ -25,7 +26,7 @@ export const tag = pgTable("tag", {
   name: text("name").notNull(),
   userId: text("user_id")
     .notNull()
-    .references(() => user.uid),
+    .references(() => user.id),
 });
 
 export const category = pgTable("category", {
@@ -33,9 +34,8 @@ export const category = pgTable("category", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   type: transactionTypeEnum("type").notNull(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => user.uid),
+  slug: text("slug").notNull(),
+  userId: text("user_id").references(() => user.id),
 });
 
 export const transaction = pgTable("transaction", {
@@ -56,7 +56,7 @@ export const transaction = pgTable("transaction", {
   onDeviceImageURI: text("on_device_image_uri"),
   userId: text("user_id")
     .notNull()
-    .references(() => user.uid),
+    .references(() => user.id),
   categoryId: text("category_id").references(() => category.uid),
 });
 
@@ -87,12 +87,10 @@ export const recurringTypeEnum = pgEnum("recurring_type", [
 
 export const recurringTransaction = pgTable("recurring_transaction", {
   id: serial("id").primaryKey(),
-  uid: text("uid")    
-    .unique()
-    .default(uid(UID_PREFIX.RECURRING_TRANSACTION)),
+  uid: text("uid").unique().default(uid(UID_PREFIX.RECURRING_TRANSACTION)),
   userId: text("user_id")
     .notNull()
-    .references(() => user.uid),
+    .references(() => user.id),
   amount: decimal("amount", { precision: 19, scale: 4 }).notNull(),
   name: text("name").notNull(),
   type: transactionTypeEnum("type").notNull(),
@@ -112,3 +110,35 @@ export const recurringTransaction = pgTable("recurring_transaction", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
   endDate: timestamp("end_date"),
 });
+
+// Define relations between tables
+export const categoryRelations = relations(category, ({ many }) => ({
+  transactions: many(transaction),
+}));
+
+export const transactionRelations = relations(transaction, ({ one, many }) => ({
+  category: one(category, {
+    fields: [transaction.categoryId],
+    references: [category.uid],
+  }),
+  user: one(user, {
+    fields: [transaction.userId],
+    references: [user.id],
+  }),
+  transactionTags: many(transactionTag),
+}));
+
+export const tagRelations = relations(tag, ({ many }) => ({
+  transactionTags: many(transactionTag),
+}));
+
+export const transactionTagRelations = relations(transactionTag, ({ one }) => ({
+  transaction: one(transaction, {
+    fields: [transactionTag.transactionId],
+    references: [transaction.uid],
+  }),
+  tag: one(tag, {
+    fields: [transactionTag.tagId],
+    references: [tag.uid],
+  }),
+}));
