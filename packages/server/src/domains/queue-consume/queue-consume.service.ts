@@ -1,8 +1,8 @@
-import { transactionConsumer } from "../transaction/transaction.consumer";
+import { transactionQueue } from "../transaction/transaction.queue";
 
 const init = async () => {
   // Initialize other consumers if needed
-  await transactionConsumer.consume();
+  await transactionQueue.onTransactionExtractCompleted();
 };
 
 export const queueConsumeService = {

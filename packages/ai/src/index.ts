@@ -2,7 +2,7 @@ import { node } from "@elysiajs/node";
 import { Elysia } from "elysia";
 import { cors } from "@elysiajs/cors";
 import { env } from "./env";
-import { transactionConsumer } from "./domain/transaction/transaction.consumer";
+import { transactionQueue } from "./domain/transaction/transaction.consumer";
 import { generateText } from "ai";
 import { google } from "@ai-sdk/google";
 
@@ -35,7 +35,7 @@ new Elysia({ adapter: node(), prefix: "/v1/api" })
     return { text };
   })
   .listen(env.PORT, () => {
-    transactionConsumer.consume();
+    transactionQueue.onTransactionExtractCompleted();
 
     console.log(`🚀 AI ready at: http://localhost:${env.PORT}`);
   });

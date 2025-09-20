@@ -9,6 +9,6 @@ const consume = () => {
   });
 };
 
-export const transactionConsumer = {
+export const transactionQueue = {
   consume,
 };

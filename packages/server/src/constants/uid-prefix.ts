@@ -5,4 +5,5 @@ export const UID_PREFIX = {
   CATEGORY: "cat",
   TAG: "tag",
   RECURRING_TRANSACTION: "rtn",
+  BUDGET: "bdg",
 };

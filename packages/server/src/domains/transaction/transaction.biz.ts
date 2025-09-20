@@ -6,9 +6,9 @@ import type {
   FindByDateRangeParams,
   FindByTagIdsParams,
   FindByUserIdParams,
-  PaginationInput,
   TransactionInput,
 } from "./transaction.type";
+import { transactionQueue } from "./transaction.queue";
 
 const create = (data: TransactionInput) => {
   return db.transaction(async () => {
@@ -24,8 +24,37 @@ const findByUid = (uid: string) => {
   return transactionRepo.findByUid(uid);
 };
 
-const updateByUid = (uid: string, data: Partial<TransactionInput>) => {
-  return transactionRepo.updateByUid(uid, data);
+const updateByUid = async (uid: string, data: Partial<TransactionInput>) => {
+  const existing = await transactionRepo.findByUid(uid);
+  if (!existing) {
+    throw new Error("Transaction not found");
+  }
+
+  const updated = await transactionRepo.updateByUid(uid, data);
+  if (data.categoryId && existing.categoryId !== data.categoryId) {
+    if (existing.type === "expense") {
+      // If the category is changed for an expense transaction, we need to update the budgets accordingly
+      transactionQueue.onUpdatedTransaction.next({
+        userId: existing.userId,
+        categoryId: existing.categoryId!,
+        // use the existing amount to subtract from the old category budget
+        amount: Number(existing.amount),
+        uid: existing.uid!,
+        actionType: "subtract",
+      });
+
+      // Add to the new category
+      transactionQueue.onUpdatedTransaction.next({
+        userId: existing.userId,
+        categoryId: data.categoryId,
+        amount: Number(data.amount),
+        uid: existing.uid!,
+        actionType: "add",
+      });
+    }
+  }
+
+  return updated;
 };
 
 const removeByUid = (uid: string) => {

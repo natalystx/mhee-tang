@@ -1,6 +1,9 @@
 import { fileTypeFromBuffer } from "file-type";
 import { transactionBiz } from "./transaction.biz";
-import type { UploadTransactionInput } from "./transaction.type";
+import {
+  type UploadTransactionInput,
+  type TransactionInput,
+} from "./transaction.type";
 import {
   transactionResultQueue,
   transactionExtractQueue,
@@ -8,6 +11,9 @@ import {
 import { documentService } from "@mhee-tang/storage";
 import { v7 as uuid } from "uuid";
 import { db } from "@/db";
+import { transactionQueue } from "./transaction.queue";
+
+const INVALID_TRANSACTION_NAME = "Invalid transaction";
 
 const queueTransactionExtract = async (
   data: UploadTransactionInput,
@@ -42,7 +48,9 @@ const onTransactionExtractCompleted = async () => {
     await documentService.deleteDirectory(
       `transactions/${userId}/${data.batchId}`
     );
-    for (const item of data.transactions) {
+    for (const item of data.transactions.filter(
+      (i) => i.name !== INVALID_TRANSACTION_NAME
+    )) {
       let categoryId: string | null = null;
 
       if (!!item.category) {
@@ -54,7 +62,8 @@ const onTransactionExtractCompleted = async () => {
         categoryId = category?.uid || null;
       }
 
-      await transactionBiz.create({
+      // Create the transaction
+      const createdTransaction = await transactionBiz.create({
         name: item.name,
         amount: String(item.amount),
         currency: item.currency,
@@ -67,6 +76,17 @@ const onTransactionExtractCompleted = async () => {
         userId: userId,
         categoryId: categoryId || undefined,
       });
+
+      // If this is an expense with a category, update any associated budget
+      if (categoryId && item.type === "expense") {
+        transactionQueue.onUpdatedTransaction.next({
+          userId: userId,
+          categoryId: categoryId,
+          amount: item.amount,
+          uid: createdTransaction[0].uid!,
+          actionType: "add",
+        });
+      }
     }
   });
 };

@@ -10,7 +10,6 @@ import {
   UploadTransactionSchema,
 } from "./transaction.type";
 import { z } from "zod";
-import openapi from "@elysiajs/openapi";
 
 export const transactionRouter = new Elysia({ name: "transaction-router" })
   .use(betterAuth)

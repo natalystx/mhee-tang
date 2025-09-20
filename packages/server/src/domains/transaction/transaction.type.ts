@@ -1,4 +1,4 @@
-import { category, type transaction } from "@/db/schema/transaction";
+import { transaction } from "@/db/schema/transaction";
 import { z } from "zod";
 
 export type TransactionInput = Omit<
@@ -16,7 +16,7 @@ export const PaginationSchema = z.object({
     .describe("Number of items per page for pagination"),
 });
 
-const CategorySchema = z.object({
+export const CategorySchema = z.object({
   uid: z.string().describe("Unique identifier for the category"),
   name: z.string().describe("Name of the category"),
   slug: z.string().describe("Slug for the category"),
