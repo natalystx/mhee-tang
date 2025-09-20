@@ -50,6 +50,8 @@ export const budget = pgTable("budget", {
   categoryId: text("category_id")
     .references(() => category.uid)
     .notNull(),
+  nextResetCron: text("next_reset_cron"),
+  nextReset: timestamp("next_reset"),
 });
 
 // Define relations for the budget table

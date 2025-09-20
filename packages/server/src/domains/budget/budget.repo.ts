@@ -112,6 +112,50 @@ const countByUserId = async (userId: string) => {
   return result.length;
 };
 
+const updateCurrentAmount = async (
+  categoryId: string,
+  userId: string,
+  amount: number,
+  type: string
+) => {
+  // Only adjust budget if it's an expense transaction
+  if (type !== "expense") {
+    return null;
+  }
+
+  // Find the budget for this category and user
+  const budgetForCategory = await db.query.budget.findFirst({
+    where: (budget, { eq, and }) =>
+      and(
+        eq(budget.categoryId, categoryId),
+        eq(budget.userId, userId),
+        eq(budget.isDeleted, false)
+      ),
+  });
+
+  if (!budgetForCategory) {
+    return null; // No budget found for this category
+  }
+
+  // Add the expense amount to the current amount
+  const currentAmount = parseFloat(
+    budgetForCategory.currentAmount?.toString() || "0"
+  );
+  const newAmount = (currentAmount + amount).toString();
+
+  // Update the budget
+  const updatedBudget = await db
+    .update(budget)
+    .set({
+      currentAmount: newAmount,
+      updatedAt: new Date(),
+    })
+    .where(eq(budget.uid, budgetForCategory.uid))
+    .returning();
+
+  return updatedBudget[0];
+};
+
 export const budgetRepo = {
   create,
   findByUid,
@@ -122,4 +166,5 @@ export const budgetRepo = {
   hardRemoveByUid,
   findByCategory,
   countByUserId,
+  updateCurrentAmount,
 };

@@ -9,6 +9,7 @@ import { budgetRouter } from "./domains/budget/budget.router";
 import { queueConsumeService } from "./domains/queue-consume/queue-consume.service";
 import { documentService } from "@mhee-tang/storage";
 import { initializeCategories } from "./db/seed";
+import { budgetQueue } from "./domains/budget/budget.queue";
 
 export const app = new Elysia({ adapter: node(), prefix: "/v1/api" })
   .use(
@@ -31,6 +32,7 @@ export const app = new Elysia({ adapter: node(), prefix: "/v1/api" })
   .listen(env.PORT, () => {
     queueConsumeService.init();
     initializeCategories();
+    budgetQueue.onUpdatedTransaction();
     console.log("Queue consumer service initialized");
     console.log(`🚀 Server ready at: http://localhost:${env.PORT}`);
   });

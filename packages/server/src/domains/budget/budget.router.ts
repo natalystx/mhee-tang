@@ -10,6 +10,7 @@ import {
   PaginationSchema,
   BudgetProgressSchema,
   BudgetOutputSchema,
+  UpdateCategoryIdSchema,
 } from "./budget.type";
 
 export const budgetRouter = new Elysia({ name: "budget-router" })
@@ -382,6 +383,72 @@ export const budgetRouter = new Elysia({ name: "budget-router" })
           data: z.object({
             count: z.number(),
           }),
+        }),
+        500: z.object({
+          error: z.boolean(),
+          message: z.string(),
+        }),
+      },
+    }
+  )
+  .put(
+    "/budgets/:uid/category",
+    async ({ user, body, params }) => {
+      try {
+        const { uid } = params;
+
+        // Check if budget exists and belongs to the user
+        const existingBudget = await budgetService.findByUid(uid);
+
+        if (!existingBudget) {
+          return {
+            error: true,
+            message: "Budget not found",
+            status: 404,
+          };
+        }
+
+        if (existingBudget.userId !== user.id) {
+          return {
+            error: true,
+            message: "Not authorized to update this budget's category",
+            status: 403,
+          };
+        }
+
+        const updatedBudget = await budgetService.updateCategoryId({
+          budgetUid: uid,
+          newCategoryId: body.newCategoryId,
+          migrateCurrentAmountOption: body.migrateCurrentAmountOption,
+        });
+
+        return { data: BudgetOutputSchema.parse(updatedBudget[0]) };
+      } catch (error: any) {
+        return {
+          error: true,
+          message: error.message || "Failed to update budget category",
+        };
+      }
+    },
+    {
+      auth: true,
+      params: z.object({
+        uid: z.string(),
+      }),
+      body: UpdateCategoryIdSchema,
+      response: {
+        200: z.object({
+          data: BudgetOutputSchema,
+        }),
+        404: z.object({
+          error: z.boolean(),
+          message: z.string(),
+          status: z.number(),
+        }),
+        403: z.object({
+          error: z.boolean(),
+          message: z.string(),
+          status: z.number(),
         }),
         500: z.object({
           error: z.boolean(),

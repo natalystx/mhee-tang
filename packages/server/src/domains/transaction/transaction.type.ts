@@ -1,4 +1,4 @@
-import { type transaction } from "@/db/schema/transaction";
+import { transaction } from "@/db/schema/transaction";
 import { z } from "zod";
 
 export type TransactionInput = Omit<

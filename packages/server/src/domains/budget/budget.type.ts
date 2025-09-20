@@ -7,7 +7,10 @@ export type BudgetInput = Omit<
   "id" | "createdAt" | "updatedAt" | "currentAmount"
 >;
 
-export type BudgetUpdateInput = Partial<BudgetInput>;
+// Allow currentAmount to be included in updates
+export type BudgetUpdateInput = Partial<BudgetInput> & {
+  currentAmount?: string;
+};
 
 export const PaginationSchema = z.object({
   page: z.number().min(1).default(1).describe("Page number for pagination"),
@@ -20,6 +23,20 @@ export const PaginationSchema = z.object({
 });
 
 export type PaginationInput = z.infer<typeof PaginationSchema>;
+
+/**
+ * Input type for updating a budget's current amount
+ */
+export interface UpdateBudgetAmountInput {
+  /** Category ID to identify the budget */
+  categoryId: string;
+  /** User ID to ensure only the user's budgets are updated */
+  userId: string;
+  /** Transaction amount as a number */
+  amount: number;
+  /** Transaction type (only 'expense' affects budgets) */
+  type: string;
+}
 
 export const BudgetSchema = z.object({
   uid: z.string().describe("Unique identifier for the budget"),
@@ -121,3 +138,17 @@ export const BudgetOutputSchema = BudgetSchema.omit({
 }).extend(CategorySchema);
 
 export type BudgetOutput = z.infer<typeof BudgetOutputSchema>;
+
+export const UpdateCategoryIdSchema = z.object({
+  budgetUid: z.string().describe("Unique identifier for the budget"),
+  newCategoryId: z
+    .string()
+    .describe("New category ID to associate with the budget"),
+  migrateCurrentAmountOption: z
+    .enum(["new_category_data", "reset_to_zero", "do_nothing"])
+    .optional()
+    .default("do_nothing")
+    .describe("Option for handling current amount when changing category"),
+});
+
+export type UpdateCategoryIdInput = z.infer<typeof UpdateCategoryIdSchema>;

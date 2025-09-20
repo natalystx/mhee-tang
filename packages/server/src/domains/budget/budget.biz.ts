@@ -18,6 +18,8 @@ import type {
   GetBudgetProgressInput,
   CreateBudgetInput,
   UpdateBudgetInput,
+  UpdateBudgetAmountInput,
+  UpdateCategoryIdInput,
 } from "./budget.type";
 
 const create = async (
@@ -180,6 +182,106 @@ const countByUserId = (userId: string) => {
   return budgetRepo.countByUserId(userId);
 };
 
+const updateCurrentAmount = async (data: UpdateBudgetAmountInput) => {
+  if (!data.categoryId) return null;
+
+  // First check if a budget exists with this category for the user
+  const budget = await budgetRepo.findByCategory(data.categoryId, data.userId);
+  if (!budget) return null;
+
+  return budgetRepo.updateCurrentAmount(
+    data.categoryId,
+    data.userId,
+    data.amount,
+    data.type
+  );
+};
+
+const updateCategoryId = async ({
+  budgetUid,
+  newCategoryId,
+  migrateCurrentAmountOption = "do_nothing",
+}: UpdateCategoryIdInput) => {
+  // Get the existing budget
+  const existing = await budgetRepo.findByUid(budgetUid);
+  if (!existing) throw new Error("Budget not found");
+
+  // Prepare update data
+  const updateData: BudgetUpdateInput = {
+    categoryId: newCategoryId,
+  };
+
+  // Handle the current amount based on the migration option
+  switch (migrateCurrentAmountOption) {
+    case "reset_to_zero":
+      // Reset the current amount to zero
+      updateData.currentAmount = "0";
+      break;
+
+    case "new_category_data":
+      // Calculate the current amount based on transactions for the new category
+      if (newCategoryId) {
+        const now = new Date();
+        const startDate = new Date(existing.startDate);
+        let endDate: Date;
+
+        // Calculate end date based on budget cycle
+        switch (existing.cycle) {
+          case "daily":
+            endDate = addDays(startDate, 1);
+            break;
+          case "weekly":
+            endDate = addWeeks(startDate, 1);
+            break;
+          case "monthly":
+            endDate = addMonths(startDate, 1);
+            break;
+          case "yearly":
+            endDate = addYears(startDate, 1);
+            break;
+          case "custom":
+            endDate = existing.endDate
+              ? new Date(existing.endDate)
+              : addMonths(startDate, 1);
+            break;
+          default:
+            endDate = addMonths(startDate, 1);
+        }
+
+        const transactions = await db.query.transaction.findMany({
+          where: (t, { eq, and, gte, lte }) =>
+            and(
+              eq(t.categoryId, newCategoryId),
+              eq(t.userId, existing.userId),
+              eq(t.isDeleted, false),
+              eq(t.type, "expense"),
+              gte(t.transactionDate, startDate),
+              lte(t.transactionDate, isBefore(now, endDate) ? now : endDate)
+            ),
+        });
+
+        if (transactions.length > 0) {
+          const totalAmount = transactions.reduce(
+            (sum, txn) => sum + parseFloat(txn.amount.toString()),
+            0
+          );
+          updateData.currentAmount = totalAmount.toString();
+        } else {
+          updateData.currentAmount = "0";
+        }
+      }
+      break;
+
+    case "do_nothing":
+    default:
+      // Keep the current amount as is
+      break;
+  }
+
+  // Update the budget
+  return budgetRepo.updateByUid(budgetUid, updateData);
+};
+
 export const budgetBiz = {
   create,
   findByUid,
@@ -191,4 +293,6 @@ export const budgetBiz = {
   findByCategory,
   getBudgetProgress,
   countByUserId,
+  updateCurrentAmount,
+  updateCategoryId,
 };
